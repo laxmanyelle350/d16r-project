@@ -2,6 +2,9 @@ from sqlalchemy.orm import Session
 import models
 import schemas
 import bcrypt
+from datetime import datetime, timedelta
+import jwt
+from fastapi import Response
 
 def create_student(db: Session, student: schemas.StudentCreate):
 
@@ -12,6 +15,23 @@ def create_student(db: Session, student: schemas.StudentCreate):
     db.refresh(db_student)
 
     return db_student
+
+
+def create_user(user: schemas.UserCreate, db: Session):
+    new_user = models.Users(**user.model_dump())
+
+    hashed = bcrypt.hashpw(
+        new_user.password.encode(),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+
+    new_user.password = hashed
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
 
 
 def get_students(db: Session):
@@ -53,6 +73,7 @@ def delete_student(db: Session, student_id: int):
 
     if not db_student:
         return None
+    
 
     db.delete(db_student)
     db.commit()
@@ -144,3 +165,49 @@ def topper(db: Session):
     )
 
     return topper
+
+
+SECRET_KEY = "abcdefghijklmnopqrstuvwxyz"
+ALGORITHM = "HS256"
+
+
+def login_user(user: schemas.UserLogin, db: Session, response: Response):
+
+    is_exists = db.query(models.Users).filter(
+        models.Users.email == user.email
+    ).first()
+
+    if not is_exists:
+        return {"message": "User Not Found"}
+
+    valid = bcrypt.checkpw(
+        user.password.encode(),
+        is_exists.password.encode()
+    )
+
+    if not valid:
+        return {"message": "Invalid Password"}
+
+    payload = {
+        "name": is_exists.name,
+        "email": is_exists.email,
+        "is_admin": is_exists.is_admin,
+        "exp": datetime.utcnow() + timedelta(hours=1)
+    }
+
+    token = jwt.encode(
+        payload,
+        SECRET_KEY,
+        algorithm=ALGORITHM
+    )
+
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True
+    )
+
+    return {
+        "message": "Login Successful",
+        "access_token": token
+    }

@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from database import Base
+from sqlalchemy import Boolean
 
 class Student(Base):
     __tablename__ = "students"
@@ -23,7 +24,10 @@ class Users(Base):
     name = Column(String(50), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(300), nullable=False)
+    is_active = Column(Boolean, default=True)
+    is_admin = Column(Boolean, default=False)
+    
 
-    is_active = Column(String(10), default="True")
-    is_admin = Column(String(10), default="False")
+
+
     
