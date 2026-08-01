@@ -5,6 +5,13 @@ import bcrypt
 from datetime import datetime, timedelta
 import jwt
 from fastapi import Response
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 def create_student(db: Session, student: schemas.StudentCreate):
 
@@ -165,10 +172,6 @@ def topper(db: Session):
     )
 
     return topper
-
-
-SECRET_KEY = "abcdefghijklmnopqrstuvwxyz"
-ALGORITHM = "HS256"
 
 
 def login_user(user: schemas.UserLogin, db: Session, response: Response):

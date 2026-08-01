@@ -1,8 +1,13 @@
-from fastapi import Cookie, HTTPException
+import os
 import jwt
 
-SECRET_KEY = "abcdefghijklmnopqrstuvwxyz"
-ALGORITHM = "HS256"
+from dotenv import load_dotenv
+from fastapi import Cookie, HTTPException
+
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 
 
 def verify_admin(access_token: str = Cookie(None)):
