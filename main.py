@@ -12,7 +12,12 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Student Management API"
 )
-
+@app.get("/")
+def home():
+    return {
+        "message": "Welcome to Student Management API",
+        "documentation": "/docs"
+    }
 
 def get_db():
     db = SessionLocal()
