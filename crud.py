@@ -190,7 +190,7 @@ def login_user(user: schemas.UserLogin, db: Session, response: Response):
 
     if not valid:
         return {"message": "Invalid Password"}
-
+    print("DB is_admin =", is_exists.is_admin)
     payload = {
         "name": is_exists.name,
         "email": is_exists.email,
